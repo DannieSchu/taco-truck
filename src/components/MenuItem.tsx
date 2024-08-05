@@ -2,13 +2,17 @@ import { MenuItem as MenuItemDetails } from "../models/menu";
 
 const MenuItem = ({
   menuItem,
-  onClick,
+  handleAdd
 }: {
   menuItem: MenuItemDetails;
-  onClick: () => void;
+  handleAdd: (id: string) => void;
 }) => {
+  const onClick = () => {
+    handleAdd(menuItem.id);
+  };
+
   return (
-    <article>
+    <article data-testid={`menuitem-${menuItem.id}`}>
       <div>
         <h2>{menuItem.name}</h2>
         <p>{menuItem.price.toFixed(2)}</p>

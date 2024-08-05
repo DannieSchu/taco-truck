@@ -6,30 +6,32 @@ import MenuItem from "./MenuItem";
 const Menu = () => {
   const [menu, setMenu] = useState<MenuItemDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [order, setOrder] = useState<string[]>([]);
 
+  // TODO decouple presentation from business logic
   const fetchMenu = useCallback(async () => {
     const menuResponse = await getMenu();
     return menuResponse.map((menuItem) => ({
       id: menuItem.id,
       name: menuItem.name,
-      // todo validate and convert price
+      // TODO validate and convert price
       price: menuItem.price,
-      // todo category enum?
-      category: menuItem.category,
+      // TODO category enum?
+      category: menuItem.category
     }));
   }, []);
 
   useEffect(() => {
     setIsLoading(true);
-    // todo handle errors
+    // TODO handle errors
     fetchMenu()
       .then((menu) => setMenu(menu))
       .finally(() => setIsLoading(false));
   }, [fetchMenu]);
 
-  const handleAdd = useCallback(() => {
-    console.log("adding item to order");
-  }, []);
+  const handleAdd = useCallback((menuItemId: string) => {
+    setOrder([...order, menuItemId]);
+  }, [order]);
 
   return (
     <>
@@ -37,9 +39,19 @@ const Menu = () => {
       {isLoading ? (
         <p data-testid="loading">loading</p>
       ) : (
+        <>
           <ul>
-            {menu.map((item) => <li key={item.id}><MenuItem menuItem={item} onClick={handleAdd}/></li>)}
+            {menu.map((item) => <li key={item.id}><MenuItem menuItem={item} handleAdd={handleAdd}/></li>)}
           </ul>
+          {
+            // TODO confirm desire for order summary and extract as needed
+            order.length > 0 ? (
+              <section>
+                <h2>Order Summary</h2>
+                <p>Item count: {order.length}</p>
+              </section>
+            ) : null}
+        </>
       )}
     </>
   );

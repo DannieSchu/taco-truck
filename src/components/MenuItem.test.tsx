@@ -12,7 +12,7 @@ describe("<MenuItem />", () => {
             price: 1.0,
         };
         const handleAdd = jest.fn();
-        render(<MenuItem menuItem={menuItemDetails} onClick={handleAdd}/>);
+        render(<MenuItem menuItem={menuItemDetails} handleAdd={handleAdd}/>);
         const formattedPrice = "1.00";
 
         expect(screen.getByRole("heading", { name: menuItemDetails.name })).toBeInTheDocument();
@@ -20,7 +20,8 @@ describe("<MenuItem />", () => {
 
         userEvent.click(screen.getByRole("button", { name: "Add to Order" }));
         expect(handleAdd).toHaveBeenCalledTimes(1);
+        expect(handleAdd).toHaveBeenCalledWith(menuItemDetails.id);
 
-        expect.assertions(3);
+        expect.assertions(4);
     });
 });
