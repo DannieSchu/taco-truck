@@ -1,7 +1,7 @@
 const OrderSubmitted = () => {
   return (
     <>
-      <p>Order submitted</p>
+      <h1>Order Submitted</h1>
     </>
   );
 };

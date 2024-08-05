@@ -2,11 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { getMenu } from "../services/menuService";
 import { MenuItem as MenuItemDetails } from "../models/menu";
 import MenuItem from "./MenuItem";
+import { createOrder, OrderItemRequest } from "../services/orderService";
+import { useNavigate } from "react-router-dom";
 
 const Menu = () => {
   const [menu, setMenu] = useState<MenuItemDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [order, setOrder] = useState<string[]>([]);
+  const [orderItemCounts, setOrderItemCounts] = useState(new Map<string, number>());
+  const navigate = useNavigate()
 
   // TODO decouple presentation from business logic
   const fetchMenu = useCallback(async () => {
@@ -30,8 +33,24 @@ const Menu = () => {
   }, [fetchMenu]);
 
   const handleAdd = useCallback((menuItemId: string) => {
-    setOrder([...order, menuItemId]);
-  }, [order]);
+    const count = orderItemCounts.get(menuItemId) || 0;
+    setOrderItemCounts(new Map(orderItemCounts.set(menuItemId, count + 1)));
+  }, [orderItemCounts]);
+
+  const onSubmit = useCallback(async () => {
+    const orderItems: OrderItemRequest[] = []
+    for (const [menuItemId, count] of orderItemCounts) {
+      const menuItem = menu.find(item => item.id === menuItemId);
+      if (!menuItem) throw Error(`Item with id ${menuItemId} not found`)
+      orderItems.push({
+        ...menuItem,
+        quantity: count
+      })
+    }
+    await createOrder({ orderItems })
+    setOrderItemCounts(new Map<string, number>());
+    navigate("/order")
+  }, [menu, navigate, orderItemCounts])
 
   return (
     <>
@@ -41,14 +60,19 @@ const Menu = () => {
       ) : (
         <>
           <ul>
-            {menu.map((item) => <li key={item.id}><MenuItem menuItem={item} handleAdd={handleAdd}/></li>)}
+            {menu.map((item) => (
+              <li key={item.id}>
+                <MenuItem menuItem={item} handleAdd={handleAdd}/>
+              </li>
+            ))}
           </ul>
           {
             // TODO confirm desire for order summary and extract as needed
-            order.length > 0 ? (
+            orderItemCounts.size > 0 ? (
               <section>
                 <h2>Order Summary</h2>
-                <p>Item count: {order.length}</p>
+                <p>Item count: {[...orderItemCounts.values()].reduce((prev, curr) => prev + curr)}</p>
+                <button onClick={onSubmit}>Submit Order</button>
               </section>
             ) : null}
         </>
