@@ -15,7 +15,7 @@ const MenuItem = ({
     <article data-testid={`menuitem-${menuItem.id}`}>
       <div>
         <h2>{menuItem.name}</h2>
-        <p>{menuItem.price.toFixed(2)}</p>
+        <p>{(menuItem.priceInCents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" })}</p>
       </div>
       <button onClick={onClick}>Add to Order</button>
     </article>

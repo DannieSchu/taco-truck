@@ -20,13 +20,13 @@ describe("useSubmitOrder", () => {
         id: "d290f1ee-6c54-4b01-90e6-d701748f0851",
         name: "Veggie Taco",
         category: "Tacos",
-        price: 1.0
+        priceInCents: 100
       },
       {
         id: "1f939cac-391f-438a-aeb5-b47299e625da",
         name: "Beef Taco",
         category: "Tacos",
-        price: 1.0
+        priceInCents: 100
       }
     ]
     const orderItemCounts = new Map<string, number>()
@@ -57,7 +57,7 @@ describe("useSubmitOrder", () => {
         id: "d290f1ee-6c54-4b01-90e6-d701748f0851",
         name: "Veggie Taco",
         category: "Tacos",
-        price: 1.0
+        priceInCents: 100
       }
     ]
     const orderItemCounts = new Map<string, number>()
@@ -85,13 +85,13 @@ describe("useSubmitOrder", () => {
         id: "d290f1ee-6c54-4b01-90e6-d701748f0851",
         name: "Veggie Taco",
         category: "Tacos",
-        price: 1.0
+        priceInCents: 100
       },
       {
         id: "1f939cac-391f-438a-aeb5-b47299e625da",
         name: "Beef Taco",
         category: "Tacos",
-        price: 1.0
+        priceInCents: 100
       }
     ]
     const orderItemCounts = new Map<string, number>()

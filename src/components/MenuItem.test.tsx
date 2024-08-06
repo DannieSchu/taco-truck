@@ -9,11 +9,11 @@ describe("<MenuItem />", () => {
       id: "1f939cac-391f-438a-aeb5-b47299e625da",
       name: "Beef Taco",
       category: "Tacos",
-      price: 1.0
+      priceInCents: 100
     };
     const handleAdd = jest.fn();
     render(<MenuItem menuItem={menuItemDetails} handleAdd={handleAdd}/>);
-    const formattedPrice = "1.00";
+    const formattedPrice = "$1.00";
 
     expect(screen.getByRole("heading", { name: menuItemDetails.name })).toBeInTheDocument();
     expect(screen.getByText(formattedPrice)).toBeInTheDocument();

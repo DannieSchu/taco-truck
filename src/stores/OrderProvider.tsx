@@ -1,11 +1,11 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useState } from "react";
-import { OrderItemRequest } from "../services/orderService";
+import { OrderedMenuItem } from "../models/menu";
 
 type OrderState = {
   orderReadyTime: string | null,
   setOrderReadyTime: Dispatch<SetStateAction<string | null>>
-  orderedMenuItems: OrderItemRequest[]
-  setOrderedMenuItems: Dispatch<SetStateAction<OrderItemRequest[]>>
+  orderedMenuItems: OrderedMenuItem[]
+  setOrderedMenuItems: Dispatch<SetStateAction<OrderedMenuItem[]>>
 }
 
 const stub = (): never => {

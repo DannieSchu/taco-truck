@@ -1,11 +1,9 @@
 import { createOrder, OrderItemRequest } from "../services/orderService";
 import { useCallback, useContext, useState } from "react";
-import { MenuItem as MenuItemDetails } from "../models/menu";
+import { MenuItem, OrderedMenuItem } from "../models/menu";
 import { OrderContext } from "../stores/OrderProvider";
 
-type OrderItemCounts = Map<string, number>;
-
-const useSubmitOrder = (menu: MenuItemDetails[]) => {
+const useSubmitOrder = (menu: MenuItem[]) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false)
 
@@ -15,8 +13,8 @@ const useSubmitOrder = (menu: MenuItemDetails[]) => {
   } = useContext(OrderContext);
 
   const submitOrder = useCallback(async (orderItemCounts: OrderItemCounts) => {
-    const menuItemsToOrder = mapCountsToRequest(orderItemCounts, menu);
-    const orderRequestBody = { orderItems: menuItemsToOrder };
+    const menuItemsToOrder = mapCountsToOrder(orderItemCounts, menu);
+    const orderRequestBody = { orderItems: mapOrderToRequest(menuItemsToOrder) };
     setIsLoading(true);
     setIsError(false);
 
@@ -38,11 +36,10 @@ const useSubmitOrder = (menu: MenuItemDetails[]) => {
   }
 }
 
-const mapCountsToRequest = (orderItemCounts: OrderItemCounts, menu: MenuItemDetails[]): OrderItemRequest[] => {
-  const orderItems: OrderItemRequest[] = []
+const mapCountsToOrder = (orderItemCounts: OrderItemCounts, menuItems: MenuItem[]): OrderedMenuItem[] => {
+  const orderItems: OrderedMenuItem[] = []
   for (const [menuItemId, count] of orderItemCounts) {
-    const menuItem = menu.find(item => item.id === menuItemId);
-
+    const menuItem = menuItems.find(item => item.id === menuItemId);
     if (!menuItem) throw Error(`Item with id ${menuItemId} not found`)
 
     orderItems.push({
@@ -54,8 +51,17 @@ const mapCountsToRequest = (orderItemCounts: OrderItemCounts, menu: MenuItemDeta
   return orderItems;
 };
 
+const mapOrderToRequest = (menuItemsToOrder: OrderedMenuItem[]): OrderItemRequest[] => {
+  return menuItemsToOrder.map(item => ({
+    id: item.id,
+    name: item.name,
+    quantity: item.quantity,
+    category: item.category,
+    price: (item.priceInCents / 100)
+  }))
+};
+
+export type OrderItemCounts = Map<string, number>;
+
 export default useSubmitOrder;
 
-export type {
-  OrderItemCounts
-}

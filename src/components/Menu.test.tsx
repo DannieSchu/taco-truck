@@ -6,14 +6,37 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ReactNode } from "react";
 import OrderProvider from "../stores/OrderProvider";
 import OrderSubmitted from "./OrderSubmitted";
+import useFetchMenu from "../hooks/useFetchMenu";
+import clearAllMocks = jest.clearAllMocks;
+
+jest.mock("../hooks/useFetchMenu")
 
 describe("<Menu />", () => {
+  const mockUseFetchMenu = useFetchMenu as jest.Mock;
+
+  beforeEach(() => {
+    mockUseFetchMenu.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      fetchMenu: jest.fn(async () => {
+      }),
+      menu: menuFixture.map(item => ({
+        id: item.id,
+        name: item.name,
+        priceInCents: item.price * 100,
+        category: item.category
+      }))
+    })
+  })
+
+  afterEach(() => clearAllMocks())
+
   const wrapper = ({ children }: { children: ReactNode }) => (
     <OrderProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={children} />
-          <Route path="/order" element={<OrderSubmitted />} />
+          <Route path="/" element={children}/>
+          <Route path="/order" element={<OrderSubmitted />}/>
         </Routes>
       </BrowserRouter>
     </OrderProvider>)
@@ -21,35 +44,19 @@ describe("<Menu />", () => {
   const renderMenu = () => render(<Menu />, { wrapper })
 
   it("displays menu content", async () => {
-    // @ts-ignore
-    const spy = jest.spyOn(window, "fetch").mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => menuFixture
-    });
     renderMenu();
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Menu");
-    expect(screen.getByTestId("loading")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: menuFixture[0].name })).toBeInTheDocument();
     expect(screen.getAllByRole("listitem")).toHaveLength(menuFixture.length);
     expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
 
-    expect.assertions(5);
-
-    spy.mockRestore();
+    expect.assertions(4);
   });
 
   it("adds menu items to order", async () => {
-    // @ts-ignore
-    const spy = jest.spyOn(window, "fetch").mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => menuFixture
-    });
     renderMenu();
     expect(screen.queryByRole("heading", { name: "Order Summary" })).not.toBeInTheDocument()
-    expect(spy).toHaveBeenCalledTimes(1)
 
     // Add first item from menu to order
     expect(await screen.findByRole("heading", { name: menuFixture[0].name })).toBeInTheDocument();
@@ -69,21 +76,11 @@ describe("<Menu />", () => {
     userEvent.click(secondMenuItemButton);
     expect(screen.getByText("Item count: 3")).toBeInTheDocument()
 
-    expect.assertions(6);
-
-    spy.mockRestore();
+    expect.assertions(5);
   });
 
   it("submits order", async () => {
-    // @ts-ignore
-    const spy = jest.spyOn(window, "fetch").mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => menuFixture
-    });
-
     renderMenu();
-    spy.mockRestore();
 
     // Add item from menu to order
     const menuItem = await screen.findByTestId(`menuitem-${menuFixture[0].id}`);
@@ -97,7 +94,5 @@ describe("<Menu />", () => {
     expect(orderSubmitted).toBeInTheDocument()
 
     expect.assertions(1);
-
-    spy.mockRestore();
   });
 });

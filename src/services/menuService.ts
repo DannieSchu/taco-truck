@@ -1,4 +1,4 @@
-type MenuResponse = MenuItemResponse[];
+export type MenuResponse = MenuItemResponse[];
 
 type MenuItemResponse = {
   id: string;

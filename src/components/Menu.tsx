@@ -1,38 +1,19 @@
-import { getMenu } from "../services/menuService";
-import { MenuItem as MenuItemDetails } from "../models/menu";
 import MenuItem from "./MenuItem";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSubmitOrder from "../hooks/useSubmitOrder";
+import useFetchMenu from "../hooks/useFetchMenu";
 
 const defaultOrderItemCounts = new Map<string, number>()
 
 const Menu = () => {
-  const [menu, setMenu] = useState<MenuItemDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [orderItemCounts, setOrderItemCounts] = useState(defaultOrderItemCounts);
   const navigate = useNavigate()
-  const { isError: isOrderError, isLoading: isOrderLoading, submitOrder } = useSubmitOrder(menu);
-
-  // TODO decouple presentation from business logic
-  const fetchMenu = useCallback(async () => {
-    const menuResponse = await getMenu();
-    return menuResponse.map((menuItem) => ({
-      id: menuItem.id,
-      name: menuItem.name,
-      // TODO validate and convert price
-      price: menuItem.price,
-      // TODO category enum?
-      category: menuItem.category
-    }));
-  }, []);
+  const { isLoading: isMenuLoading, menu, fetchMenu } = useFetchMenu()
+  const { submitOrder } = useSubmitOrder(menu);
 
   useEffect(() => {
-    setIsLoading(true);
-    // TODO handle errors
-    fetchMenu()
-      .then((menu) => setMenu(menu))
-      .finally(() => setIsLoading(false));
+    fetchMenu().then()
   }, [fetchMenu]);
 
   const handleAdd = useCallback((menuItemId: string) => {
@@ -49,7 +30,7 @@ const Menu = () => {
   return (
     <>
       <h1>Menu</h1>
-      {isLoading ? (
+      {isMenuLoading ? (
         <p data-testid="loading">loading</p>
       ) : (
         <>

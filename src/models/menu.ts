@@ -1,6 +1,10 @@
 export type MenuItem = {
   id: string;
   name: string;
-  price: number;
+  priceInCents: number;
   category: string;
+};
+
+export type OrderedMenuItem = MenuItem & {
+  quantity: number;
 };
