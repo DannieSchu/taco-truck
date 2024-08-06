@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
 import { getMenu } from "../services/menuService";
 import { MenuItem as MenuItemDetails } from "../models/menu";
 import MenuItem from "./MenuItem";
-import { createOrder, OrderItemRequest } from "../services/orderService";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useSubmitOrder from "../hooks/useSubmitOrder";
+
+const defaultOrderItemCounts = new Map<string, number>()
 
 const Menu = () => {
   const [menu, setMenu] = useState<MenuItemDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [orderItemCounts, setOrderItemCounts] = useState(new Map<string, number>());
+  const [orderItemCounts, setOrderItemCounts] = useState(defaultOrderItemCounts);
   const navigate = useNavigate()
+  const { isError: isOrderError, isLoading: isOrderLoading, submitOrder } = useSubmitOrder(menu);
 
   // TODO decouple presentation from business logic
   const fetchMenu = useCallback(async () => {
@@ -38,19 +41,10 @@ const Menu = () => {
   }, [orderItemCounts]);
 
   const onSubmit = useCallback(async () => {
-    const orderItems: OrderItemRequest[] = []
-    for (const [menuItemId, count] of orderItemCounts) {
-      const menuItem = menu.find(item => item.id === menuItemId);
-      if (!menuItem) throw Error(`Item with id ${menuItemId} not found`)
-      orderItems.push({
-        ...menuItem,
-        quantity: count
-      })
-    }
-    await createOrder({ orderItems })
-    setOrderItemCounts(new Map<string, number>());
+    await submitOrder(orderItemCounts);
+    setOrderItemCounts(defaultOrderItemCounts);
     navigate("/order")
-  }, [menu, navigate, orderItemCounts])
+  }, [navigate, orderItemCounts, submitOrder])
 
   return (
     <>

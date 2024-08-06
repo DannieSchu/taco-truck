@@ -1,19 +1,24 @@
-import { render, screen, within } from "@testing-library/react";
 import Menu from "./Menu";
 import menuFixture from "../fixtures/menu.json";
-import orderFixture from "../fixtures/order.json";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ReactNode } from "react";
+import OrderProvider from "../stores/OrderProvider";
+import OrderSubmitted from "./OrderSubmitted";
 
 describe("<Menu />", () => {
-  const renderWithRouter = (element: ReactNode) => render(
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={element}>
-        </Route>
-      </Routes>
-    </BrowserRouter>)
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <OrderProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={children} />
+          <Route path="/order" element={<OrderSubmitted />} />
+        </Routes>
+      </BrowserRouter>
+    </OrderProvider>)
+
+  const renderMenu = () => render(<Menu />, { wrapper })
 
   it("displays menu content", async () => {
     // @ts-ignore
@@ -22,7 +27,7 @@ describe("<Menu />", () => {
       status: 200,
       json: async () => menuFixture
     });
-    renderWithRouter(<Menu />);
+    renderMenu();
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Menu");
     expect(screen.getByTestId("loading")).toBeInTheDocument();
@@ -42,8 +47,9 @@ describe("<Menu />", () => {
       status: 200,
       json: async () => menuFixture
     });
-    renderWithRouter(<Menu />);
+    renderMenu();
     expect(screen.queryByRole("heading", { name: "Order Summary" })).not.toBeInTheDocument()
+    expect(spy).toHaveBeenCalledTimes(1)
 
     // Add first item from menu to order
     expect(await screen.findByRole("heading", { name: menuFixture[0].name })).toBeInTheDocument();
@@ -63,7 +69,7 @@ describe("<Menu />", () => {
     userEvent.click(secondMenuItemButton);
     expect(screen.getByText("Item count: 3")).toBeInTheDocument()
 
-    expect.assertions(5);
+    expect.assertions(6);
 
     spy.mockRestore();
   });
@@ -76,14 +82,8 @@ describe("<Menu />", () => {
       json: async () => menuFixture
     });
 
-    renderWithRouter(<Menu />);
+    renderMenu();
     spy.mockRestore();
-    // @ts-ignore
-    spy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => orderFixture
-    })
 
     // Add item from menu to order
     const menuItem = await screen.findByTestId(`menuitem-${menuFixture[0].id}`);
@@ -93,10 +93,8 @@ describe("<Menu />", () => {
 
     // Submit order
     userEvent.click(await screen.findByRole("button", { name: "Submit Order" }));
-    expect(spy).toHaveBeenCalledWith("https://virtserver.swaggerhub.com/Detroit_Labs/Taco_Truck/1.0.0/order", {
-      "body": "{\"orderItems\":[{\"id\":\"d290f1ee-6c54-4b01-90e6-d701748f0851\",\"name\":\"Veggie Taco\",\"price\":1,\"category\":\"Tacos\",\"quantity\":2}]}",
-      "method": "POST"
-    })
+    const orderSubmitted = await screen.findByRole("heading", { name: "Order Submitted" });
+    expect(orderSubmitted).toBeInTheDocument()
 
     expect.assertions(1);
 
