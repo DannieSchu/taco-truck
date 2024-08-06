@@ -8,6 +8,7 @@ import OrderProvider from "../stores/OrderProvider";
 import OrderSubmitted from "./OrderSubmitted";
 import useFetchMenu from "../hooks/useFetchMenu";
 import clearAllMocks = jest.clearAllMocks;
+import { mapMenuToCategories, mapToMenuItems } from "../models/menu";
 
 jest.mock("../hooks/useFetchMenu")
 
@@ -18,14 +19,9 @@ describe("<Menu />", () => {
     mockUseFetchMenu.mockReturnValue({
       isLoading: false,
       isError: false,
-      fetchMenu: jest.fn(async () => {
-      }),
-      menu: menuFixture.map(item => ({
-        id: item.id,
-        name: item.name,
-        priceInCents: item.price * 100,
-        category: item.category
-      }))
+      fetchMenu: jest.fn(async () => {}),
+      menu: mapToMenuItems(menuFixture),
+      categorizedMenu: mapMenuToCategories(mapToMenuItems(menuFixture))
     })
   })
 
@@ -47,11 +43,15 @@ describe("<Menu />", () => {
     renderMenu();
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Menu");
-    expect(await screen.findByRole("heading", { name: menuFixture[0].name })).toBeInTheDocument();
+    const categorySection = await screen.findByTestId(menuFixture[0].category)
+    const categoryName = within(categorySection).getByRole("heading", { level: 2, name: menuFixture[0].category })
+    expect(categoryName).toBeInTheDocument()
+    const menuItemName = within(categorySection).getByRole("heading", { level: 3, name: menuFixture[0].name })
+    expect(menuItemName).toBeInTheDocument()
     expect(screen.getAllByRole("listitem")).toHaveLength(menuFixture.length);
     expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
 
-    expect.assertions(4);
+    expect.assertions(5);
   });
 
   it("adds menu items to order", async () => {

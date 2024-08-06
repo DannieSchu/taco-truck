@@ -8,11 +8,11 @@ import "./Menu.css";
 const Menu = () => {
   const [orderItemCounts, setOrderItemCounts] = useState(new Map<string, number>());
   const navigate = useNavigate()
-  const { isLoading: isMenuLoading, menu, fetchMenu } = useFetchMenu()
+  const { categorizedMenu, isLoading: isMenuLoading, menu, fetchMenu } = useFetchMenu()
   const { submitOrder } = useSubmitOrder(menu);
 
   useEffect(() => {
-    fetchMenu().then()
+    (async () => await fetchMenu())()
   }, [fetchMenu]);
 
   const handleAdd = useCallback((menuItemId: string) => {
@@ -33,13 +33,17 @@ const Menu = () => {
         <p data-testid="loading">loading</p>
       ) : (
         <>
-          <ul>
-            {menu.map((item) => (
-              <li key={item.id}>
-                <MenuItem menuItem={item} handleAdd={handleAdd}/>
-              </li>
-            ))}
-          </ul>
+          {[...categorizedMenu.entries()].map(([category, menuItems]) =>
+            <div key={category} data-testid={category}>
+              <h2>{category}</h2>
+              <ul>{menuItems.map((item) => (
+                <li key={item.id}>
+                  <MenuItem menuItem={item} handleAdd={handleAdd}/>
+                </li>
+              ))}
+              </ul>
+            </div>)
+          }
           {
             // TODO confirm desire for order summary and extract as needed
             orderItemCounts.size > 0 ? (

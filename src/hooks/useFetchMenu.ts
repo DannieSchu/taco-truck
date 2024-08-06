@@ -1,11 +1,12 @@
 import { useCallback, useState } from "react";
-import { MenuItem } from "../models/menu";
-import { getMenu, MenuResponse } from "../services/menuService";
+import { CategoriesMap, mapMenuToCategories, mapToMenuItems, MenuItem } from "../models/menu";
+import { getMenu } from "../services/menuService";
 
 const useFetchMenu = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false)
   const [menu, setMenu] = useState<MenuItem[]>([])
+  const [categorizedMenu, setCategorizedMenu] = useState<CategoriesMap>(new Map())
 
   const fetchMenu = useCallback(async () => {
     setIsLoading(true)
@@ -15,6 +16,7 @@ const useFetchMenu = () => {
       const response = await getMenu();
       const menuItems = mapToMenuItems(response)
       setMenu(menuItems)
+      setCategorizedMenu(mapMenuToCategories(menuItems))
     } catch (e) {
       setIsError(true)
     } finally {
@@ -26,27 +28,10 @@ const useFetchMenu = () => {
     fetchMenu,
     isError,
     isLoading,
-    menu
+    menu,
+    categorizedMenu
   }
-}
-
-const mapToMenuItems = (menuResponse: MenuResponse): MenuItem[] => {
-  return menuResponse.map(item => {
-      if (item.price < 0) {
-        throw Error("Price must be a positive number")
-      }
-      return {
-        id: item.id,
-        name: item.name,
-        priceInCents: item.price * 100,
-        category: item.category
-      }
-    }
-  )
 }
 
 export default useFetchMenu;
 
-export {
-  mapToMenuItems
-}
