@@ -3,11 +3,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSubmitOrder from "../hooks/useSubmitOrder";
 import useFetchMenu from "../hooks/useFetchMenu";
-
-const defaultOrderItemCounts = new Map<string, number>()
+import "./Menu.css";
 
 const Menu = () => {
-  const [orderItemCounts, setOrderItemCounts] = useState(defaultOrderItemCounts);
+  const [orderItemCounts, setOrderItemCounts] = useState(new Map<string, number>());
   const navigate = useNavigate()
   const { isLoading: isMenuLoading, menu, fetchMenu } = useFetchMenu()
   const { submitOrder } = useSubmitOrder(menu);
@@ -23,12 +22,12 @@ const Menu = () => {
 
   const onSubmit = useCallback(async () => {
     await submitOrder(orderItemCounts);
-    setOrderItemCounts(defaultOrderItemCounts);
+    setOrderItemCounts(new Map<string, number>());
     navigate("/order")
   }, [navigate, orderItemCounts, submitOrder])
 
   return (
-    <>
+    <section className={"Menu-page"}>
       <h1>Menu</h1>
       {isMenuLoading ? (
         <p data-testid="loading">loading</p>
@@ -44,7 +43,7 @@ const Menu = () => {
           {
             // TODO confirm desire for order summary and extract as needed
             orderItemCounts.size > 0 ? (
-              <section>
+              <section className={"Order-summary"}>
                 <h2>Order Summary</h2>
                 <p>Item count: {[...orderItemCounts.values()].reduce((prev, curr) => prev + curr)}</p>
                 <button onClick={onSubmit}>Submit Order</button>
@@ -52,7 +51,7 @@ const Menu = () => {
             ) : null}
         </>
       )}
-    </>
+    </section>
   );
 };
 

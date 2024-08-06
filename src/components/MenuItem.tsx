@@ -1,9 +1,10 @@
 import { MenuItem as MenuItemDetails } from "../models/menu";
+import "./MenuItem.css"
 
 const MenuItem = ({
-  menuItem,
-  handleAdd
-}: {
+                    menuItem,
+                    handleAdd
+                  }: {
   menuItem: MenuItemDetails;
   handleAdd: (id: string) => void;
 }) => {

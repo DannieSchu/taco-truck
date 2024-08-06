@@ -1,0 +1,17 @@
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.Menu-page {
+    width: 70%;
+    max-width: 600px;
+    margin: 50px auto;
+}
+
+.Order-summary {
+    margin-top: 50px;
+    background-color: lightgrey;
+    border-radius: 5px;
+    padding: 15px;
+}

@@ -1,0 +1,12 @@
+header {
+    margin-top: 0;
+    height: 70px;
+    padding-left: 20px;
+    background-color: black;
+}
+
+header > h2 {
+    line-height: 70px;
+    margin: 0;
+    color: white;
+}
